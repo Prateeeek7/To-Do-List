@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>To-Do List</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #1a1a1a;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ffffff;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #444;
+      margin-bottom: 15px;
+      font-size: 2rem;
+      user-select: none;
+    }
+
+    .datetime {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-bottom: 20px;
+      user-select: none;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      background-color: #2d2d2d;
+      padding: 15px 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .stat-item {
+      text-align: center;
+      flex: 1 1 45%;
+      min-width: 120px;
+      user-select: none;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #00ff9d;
+      line-height: 1;
+    }
+
+    .controls {
+      background-color: #2d2d2d;
+      padding: 20px 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #444;
+      border-radius: 6px;
+      font-size: 1rem;
+      background-color: #333;
+      color: white;
+      transition: border-color 0.3s;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #00ff9d;
+    }
+
+    button {
+      padding: 12px 18px;
+      background-color: #00ff9d;
+      color: #1a1a1a;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      font-weight: bold;
+      font-size: 1rem;
+      user-select: none;
+    }
+
+    button:hover,
+    button:focus {
+      background-color: #00cc7e;
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .delete-btn {
+      background-color: #ff4757;
+      color: white;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      border-radius: 4px;
+    }
+
+    .delete-btn:hover,
+    .delete-btn:focus {
+      background-color: #ff6b81;
+      transform: none;
+    }
+
+    .complete-btn {
+      background-color: #5352ed;
+      color: white;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      border-radius: 4px;
+    }
+
+    .complete-btn:hover,
+    .complete-btn:focus {
+      background-color: #6c6bff;
+      transform: none;
+    }
+
+    #output {
+      background-color: #2d2d2d;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      min-height: 120px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .todo-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 10px;
+      margin: 8px 0;
+      background-color: #333;
+      border-radius: 6px;
+      transition: background-color 0.3s, transform 0.3s;
+      word-break: break-word;
+    }
+
+    .todo-item:hover {
+      background-color: #404040;
+      transform: translateX(5px);
+    }
+
+    .todo-item.completed {
+      background-color: #2d3436;
+      opacity: 0.7;
+    }
+
+    .todo-item.completed .todo-text {
+      text-decoration: line-through;
+      color: #7f8c8d;
+    }
+
+    .todo-text {
+      flex: 1;
+      color: #ffffff;
+      font-size: 1rem;
+      user-select: text;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .todo-text:focus {
+      outline: 2px solid #00ff9d;
+      background-color: #444;
+    }
+
+    .todo-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: auto;
+      padding: 20px 10px;
+      color: #666;
+      font-size: 0.85rem;
+      border-top: 1px solid #444;
+      user-select: none;
+    }
+
+    .footer span {
+      color: #00ff9d;
+      font-weight: bold;
+    }
+
+    /* Celebration Overlay */
+    .celebration-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .celebration-overlay.show {
+      display: flex;
+      animation: fadeIn 0.5s ease-in-out forwards;
+    }
+
+    .celebration-content {
+      color: #00ff9d;
+      animation: celebrationPop 1s ease-in-out forwards;
+      max-width: 600px;
+      padding: 20px;
+    }
+
+    .celebration-content h2 {
+     font-size: 2rem;
+    margin: 0;
+    line-height: 1.2;
+    text-align: center;
+    }
+
+    .celebration-content p {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes celebrationPop {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Confetti */
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      opacity: 0;
+      border-radius: 2px;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    @keyframes confettiFall {
+      0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 480px) {
+      body {
+        max-width: 100%;
+        padding: 15px 10px;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+        padding-bottom: 8px;
+      }
+
+      .stats {
+        gap: 15px;
+      }
+
+      .stat-item {
+        flex: 1 1 100%;
+        font-size: 0.9rem;
+      }
+
+      .stat-number {
+        font-size: 1.6rem;
+      }
+
+      .controls {
+        padding: 15px 10px;
+      }
+
+      .input-group {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      input[type="text"], button {
+        font-size: 1rem;
+        padding: 12px 15px;
+        width: 100%;
+      }
+
+      #output {
+        max-height: 50vh;
+        padding: 12px 15px;
+      }
+
+      .todo-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px;
+      }
+
+      .todo-actions {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 12px;
+        margin-top: 8px;
+      }
+
+      .todo-text {
+        font-size: 1rem;
+      }
+
+      .celebration-content h2 {
+        font-size: 2rem;
+      }
+
+      .celebration-content p {
+        font-size: 1rem;
+      }
+
+      .footer {
+        font-size: 0.8rem;
+        padding: 15px 10px;
+      }
+    }
+@keyframes confettiFall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) rotate(360deg);
+  }
+}
+
+.confetti {
+  position: fixed;
+  top: -10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  opacity: 1;
+  animation-name: confettiFall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  animation-duration: 3s;
+}
+
+    @media (min-width: 601px) and (max-width: 900px) {
+      body {
+        max-width: 90%;
+        padding: 20px;
+      }
+    }
+  .history-section {
+  background-color: #2d2d2d;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.history-section h2 {
+  font-size: 1.2rem;
+  margin: 0 0 15px 0;
+  color: #00ff9d;
+}
+
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.history-day {
+  background-color: #333;
+  padding: 15px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.history-date {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 8px;
+}
+
+.history-stats {
+  font-size: 1.1rem;
+  color: #00ff9d;
+}
+
+@media (max-width: 480px) {
+  .history-grid {
+    grid-template-columns: 1fr;
+  }
+}
+  </style>
+</head>
+<body>
+
+  <h1>Todo List</h1>
+  <div class="datetime" id="datetimeDisplay">Loading date & time...</div>
+
+  <div class="stats" aria-live="polite" aria-atomic="true">
+    <div class="stat-item">
+      <div class="stat-number" id="totalCount">0</div>
+      <div>Total Tasks</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="completedCount">0</div>
+      <div>Completed</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="input-group">
+      <input type="text" id="todoInput" placeholder="Enter new todo item" aria-label="New todo item" />
+      <button type="button" onclick="addTodo()" aria-label="Add todo">Add</button>
+    </div>
+  </div>
+
+  <div id="output" role="list" aria-label="Todo items"></div>
+<div class="history-section">
+  <h2>3-Day History</h2>
+  <div class="history-grid" id="historyGrid"></div>
+</div>
+
+  <div class="footer">
+    Created by <span>Pratik Kumar</span> &copy; 2025
+  </div>
+
+  <!-- Celebration Overlay -->
+  <div class="celebration-overlay" id="celebrationOverlay" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="celebration-content">
+      <h2>🎉 Congrats! All tasks completed! 🎉</h2>
+      <p>Keep up the great work!</p>
+    </div>
+  </div>
+</body>
+  <script>
+    let todos = [];
+    let celebrationShown = false;
+
+    function updateDateTime() {
+      const now = new Date();
+      const options = { 
+        weekday: 'short', year: 'numeric', month: 'short', 
+        day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' 
+      };
+      document.getElementById('datetimeDisplay').textContent = now.toLocaleString('en-US', options);
+    }
+
+    setInterval(updateDateTime, 1000);
+
+    // Save to localStorage
+    function saveToStorage() {
+      localStorage.setItem('todos', JSON.stringify(todos));
+    }
+
+    // Load from localStorage
+    function loadFromStorage() {
+      const stored = localStorage.getItem('todos');
+      if (stored) {
+        todos = JSON.parse(stored);
+      }
+    }
+
+    // Display todos
+    function displayTodos() {
+      const output = document.getElementById('output');
+      output.innerHTML = '';
+
+      todos.forEach((todo, index) => {
+        const todoItem = document.createElement('div');
+        todoItem.className = 'todo-item' + (todo.completed ? ' completed' : '');
+        todoItem.setAttribute('role', 'listitem');
+        todoItem.dataset.index = index;
+
+        // Editable text span
+        const todoText = document.createElement('span');
+        todoText.className = 'todo-text';
+        todoText.textContent = todo.text;
+        todoText.tabIndex = 0;
+        todoText.setAttribute('aria-label', 'Todo item: ' + todo.text + (todo.completed ? ', completed' : ', not completed'));
+        todoText.contentEditable = false;
+
+        // Enable editing on click or keyboard Enter
+        todoText.addEventListener('click', () => startEditing(todoText, index));
+        todoText.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            if (!todoText.isContentEditable) {
+              startEditing(todoText, index);
+            } else {
+              finishEditing(todoText, index);
+            }
+          }
+          else if (e.key === 'Escape' && todoText.isContentEditable) {
+            cancelEditing(todoText, index);
+          }
+        });
+
+        todoText.addEventListener('blur', () => {
+          if (todoText.isContentEditable) {
+            finishEditing(todoText, index);
+          }
+        });
+
+        // Actions container
+        const actions = document.createElement('div');
+        actions.className = 'todo-actions';
+
+        // Complete toggle button
+        const completeBtn = document.createElement('button');
+        completeBtn.className = 'complete-btn';
+        completeBtn.textContent = todo.completed ? 'Undo' : 'Done';
+        completeBtn.setAttribute('aria-label', todo.completed ? 'Mark task as incomplete' : 'Mark task as completed');
+        completeBtn.addEventListener('click', () => {
+          todos[index].completed = !todos[index].completed;
+          saveToStorage();
+          displayTodos();
+          checkCompletion();
+        });
+
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.setAttribute('aria-label', 'Delete task: ' + todo.text);
+        deleteBtn.addEventListener('click', () => {
+          todos.splice(index, 1);
+          saveToStorage();
+          displayTodos();
+          checkCompletion();
+        });
+
+        actions.appendChild(completeBtn);
+        actions.appendChild(deleteBtn);
+
+        todoItem.appendChild(todoText);
+        todoItem.appendChild(actions);
+
+        output.appendChild(todoItem);
+      });
+
+      updateStats();
+    }
+
+    // Start editing a todo text
+    function startEditing(todoTextElem, index) {
+      todoTextElem.contentEditable = true;
+      todoTextElem.focus();
+
+      // Save current text as attribute to revert if needed
+      todoTextElem.dataset.originalText = todoTextElem.textContent;
+
+      // Place cursor at end
+      document.execCommand('selectAll', false, null);
+      document.getSelection().collapseToEnd();
+    }
+
+    // Finish editing and save changes
+    function finishEditing(todoTextElem, index) {
+      const newText = todoTextElem.textContent.trim();
+      if (newText === '') {
+        // If empty, revert to original
+        todoTextElem.textContent = todoTextElem.dataset.originalText;
+      } else {
+        todos[index].text = newText;
+        saveToStorage();
+      }
+      todoTextElem.contentEditable = false;
+      displayTodos();
+    }
+
+    // Cancel editing and revert
+    function cancelEditing(todoTextElem, index) {
+      todoTextElem.textContent = todoTextElem.dataset.originalText;
+      todoTextElem.contentEditable = false;
+      displayTodos();
+    }
+
+    // Add todo
+    function addTodo() {
+      const input = document.getElementById('todoInput');
+      const text = input.value.trim();
+      if (text === '') return;
+
+      todos.push({ text, completed: false });
+      input.value = '';
+      saveToStorage();
+      displayTodos();
+      checkCompletion();
+    }
+
+    // Update stats
+    function updateStats() {
+      const totalCount = todos.length;
+      const completedCount = todos.filter(t => t.completed).length;
+
+      document.getElementById('totalCount').textContent = totalCount;
+      document.getElementById('completedCount').textContent = completedCount;
+    }
+
+    // Check if all tasks completed for celebration
+    function checkCompletion() {
+      if (todos.length > 0 && todos.every(t => t.completed)) {
+        if (!celebrationShown) {
+          showCelebration();
+          celebrationShown = true;
+        }
+      } else {
+        celebrationShown = false;
+        hideCelebration();
+      }
+    }
+
+    // Show celebration overlay with confetti
+    function showCelebration() {
+      const overlay = document.getElementById('celebrationOverlay');
+      overlay.classList.add('show');
+
+      // Confetti effect
+      createConfetti();
+
+      setTimeout(() => {
+        hideCelebration();
+      }, 3500);
+    }
+
+    // Hide celebration overlay
+    function hideCelebration() {
+      const overlay = document.getElementById('celebrationOverlay');
+      overlay.classList.remove('show');
+      clearConfetti();
+    }
+
+    // Confetti implementation
+    let confettiElements = [];
+
+   function createConfetti() {
+  const overlay = document.getElementById('celebrationOverlay');
+  const colors = ['#00ff9d', '#ff6b81', '#6c6bff', '#feca57', '#54a0ff'];
+  for (let i = 0; i < 100; i++) {
+    const confetti = document.createElement('div');
+    confetti.classList.add('confetti');
+    confetti.style.backgroundColor = colors[i % colors.length];
+    confetti.style.left = Math.random() * window.innerWidth + 'px';
+    confetti.style.width = (5 + Math.random() * 5) + 'px';
+    confetti.style.height = (5 + Math.random() * 5) + 'px';
+    
+    // Random animation delay so confetti falls scattered
+    confetti.style.animationDelay = (Math.random() * 3) + 's';
+
+    // Random rotate direction and speed
+    const rotateDirection = Math.random() > 0.5 ? 1 : -1;
+    const rotateSpeed = 360 * (1 + Math.random()); // degrees per animation duration
+    confetti.style.animationName = 'confettiFall';
+
+    // Add random rotation speed by updating animation dynamically (optional)
+    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+    overlay.appendChild(confetti);
+    confettiElements.push(confetti);
+  }
+}
+
+
+    function clearConfetti() {
+      confettiElements.forEach(c => {
+        c.remove();
+      });
+      confettiElements = [];
+    }
+
+    // Initial load
+    loadFromStorage();
+    displayTodos();
+    updateDateTime();
+  // History tracking
+let historyData = {};
+
+function updateHistory() {
+  const today = new Date().toLocaleDateString();
+  const completedCount = todos.filter(t => t.completed).length;
+  const totalCount = todos.length;
+
+  // Load existing history
+  historyData = JSON.parse(localStorage.getItem('todoHistory') || '{}');
+
+  historyData[today] = {
+    completed: completedCount,
+    total: totalCount
+  };
+
+  // Keep only last 3 days
+  const dates = Object.keys(historyData)
+    .sort()
+    .reverse()
+    .slice(0, 3);
+
+  const newHistory = {};
+  dates.forEach(date => {
+    newHistory[date] = historyData[date];
+  });
+
+  // Save to localStorage
+  localStorage.setItem('todoHistory', JSON.stringify(newHistory));
+  displayHistory();
+}
+
+function displayHistory() {
+  const historyGrid = document.getElementById('historyGrid');
+  historyGrid.innerHTML = '';
+
+  const history = JSON.parse(localStorage.getItem('todoHistory') || '{}');
+  const dates = Object.keys(history).sort().reverse();
+
+  dates.forEach(date => {
+    const dayData = history[date];
+    const historyDay = document.createElement('div');
+    historyDay.className = 'history-day';
+
+    const formattedDate = new Date(date).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    });
+
+    historyDay.innerHTML = `
+      <div class="history-date">${formattedDate}</div>
+      <div class="history-stats">
+        ${dayData.completed}/${dayData.total}
+        <small>completed</small>
+      </div>
+    `;
+
+    historyGrid.appendChild(historyDay);
+  });
+}
+
+// Update the existing saveToStorage function
+function saveToStorage() {
+  localStorage.setItem('todos', JSON.stringify(todos));
+  updateHistory(); // Add this line
+}
+
+loadFromStorage();
+displayTodos();
+displayHistory(); 
+updateDateTime();
+  </script>
+</html>

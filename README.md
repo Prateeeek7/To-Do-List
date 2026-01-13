@@ -1,4 +1,5 @@
 # 🌑 Dark Theme Todo List
+"My first ever Project into WebDev world"
 
 A sleek and modern Todo List web app built with vanilla HTML, CSS, and JavaScript. Designed with a dark theme UI, animated completion celebrations (confetti), live date & time, and local storage support to persist your tasks across browser sessions.
 
@@ -13,13 +14,6 @@ A sleek and modern Todo List web app built with vanilla HTML, CSS, and JavaScrip
 - 🕒 **Real-Time Clock** — Auto-updating date and time display.
 - 💾 **Local Storage** — Your todos stay saved even after you refresh or close the tab.
 
----
-
-## 📸 Screenshots
-
-*(Add screenshots of your Todo app UI here — list view, confetti animation, etc.)*
-
----
 
 ## 🚀 Getting Started
 
